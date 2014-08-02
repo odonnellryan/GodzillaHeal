@@ -1,0 +1,29 @@
+- /gh Spell Name(Rank 1)
+  Will target the person in the raid who:
+  1. Is in range.
+  2. Has the lowest amount of health percent (within the people in range)
+  3. Is not blacklisted (which occurs if a heal fails due to LOS, allowing you to spam the command)
+  4. Has more missing health than the `threshold` (as it is offical reffered to).
+  5. In default mode, the person who has the lowest percent health. See `modes` for more details. Note that the first four bulelts apply regardless of the mode.
+
+  If no one in the raid meets the above criteria, /gh will clear your target.
+
+- /gh cancel
+  If called while casting a heal initiated by Godzilla heal, and the target has moved above the threshold, the cast will cancel.
+  Note that in private servers there are issues with cast events not sending properly (I think this is the issue). You probably see this when you interrupt a cast and then cast again quickly and your cast bar doesn't show up, but the server actually accepted the cast and it ends up casting anyway. This affects this addon too. When this happens the addon doesn't get notified the cast started and your targets will start changing a lot as it goes through its normal targetting. I think this is a bug in Mangos that you just have to deal with. I may investiate to seeif there is a work around for this problem, but I suspect there isn't. So just stop healing and let it fix itself.
+
+- /gh set
+  Change the configuration for the mode
+
+- Modes:
+  1. Lowest percent. Target the person who has the lowest percent. Really simple.
+  2. Highest missing hp. Target the person with the most missing hp.
+
+- Filters:
+  1. inc/include/i = player-name/group[1-8]/grp[1-8]/g[1-8], space seperated
+    e.g. [inc=g1 g2 xut]
+
+Notes:
+1. After GH has started a heal, /gh will not change your target nor attempt to change targets until the heal either completes or fails. 
+2. I would like for the threshold to be able to be set for different ranks somehow. Currently it's the same number across the board.
+

@@ -1,0 +1,13 @@
+## Interface: 11200
+## Title: GodzillaHeal
+## Notes: Could be used to heal through an attack by Godzilla.
+## Author: Godzilla
+## Dependencies: TheoryCraft
+## SavedVariables: GodzillaHeal_Settings
+
+libs\AceLibrary\AceLibrary.lua
+libs\AceEvent-2.0\AceEvent-2.0.lua
+libs\HealComm-1.0\HealComm-1.0.lua
+
+CastDetails.lua
+GodzillaHeal.xml

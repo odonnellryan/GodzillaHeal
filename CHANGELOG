@@ -1,0 +1,47 @@
+1.0 Base Release
+
+1.1
+- Fix bug that would put feign deathed hunters at the top
+- Introduce randomization, /gh set mode 2
+- Introduce threshold. GodzillaHeal with not target someone unless they are missing more health than the threshold.
+  You can set this via /gh set threshold 250. Default is 250.
+- Introduce /gh cancel. If called while casting a heal initiated by Godzilla heal, and the target has moved above the threshold,
+  the cast will cancel.
+
+1.2
+- Introduce 200 ms delay after a successful /gh cancel. This will mostly prevent the cancel cast bug.
+- Fix accidently depending on Grid
+- Fix bugs detecting where a healing spell is on your bar. Not sure if this is bulletproof yet.
+
+1.3
+- Introduce /ght, aka "GodzillaHeal Tank". Does not do any target selection, just casts the heal on your target. When used with /gh cancel, 
+  GodzillaHeal will cancel the cast as last as possible. This is meant to be used for tank healing in raids, when you want to cancel cast
+  if the target hasn't lost any health, but you want the cast to go as long as possible before canceling. Any healed casted as a result of /ght
+  will have this "delayed" cancel behavior, as opposed to the behavior of heals intiated with /gh which will cancel the second the target does above
+  the threshold.
+
+1.4
+- Fix target changing while casting; introduced in 1.3
+- Fix blacklisting (also broken last version)
+
+1.5
+- Introduce HighestMissingHp mode. 
+- Randomization is no longer tied to mode.
+- Introduce /gh set randomize. Allows the randomization threshold to be customized.
+- Introduce /gh watch. This allows you to watch for a spell cast and send a chat message as a result. This is a replacement for /say /cast macros
+  which can spam a lot. /gh watch will only announce if/when the cast actually goes through, and doesn't require macros. It hooks into every
+  possible way to cast a spell. /gh watch for syntax details.
+- Fix bug which would target ghosts
+- Introduce auto down rank. /gh set autodownrank.
+
+1.6
+- Introduce /gh debug. 
+- Introduce filtering. Using wow macro style arguments: /gh [inc=*, ex=g3]. The matchs works like this: a unit must match both the exclusion and inclusion
+  expression to be eligible for targetting. Both expressions follow the same rules for matching:
+    - Star (*) matches everything
+    - An empty string matches nothing
+    - g1 matches any unit in group 1
+    - Player names match player names, as you expect
+    - An example: /gh [inc=g1 g2] Flash Heal. This will flash heal people in group 1 and 2.
+  The use cases include bosses like vael and emeriss, where you really don't want to accidently heal  people in priest groups. 
+  Other possibilities include groups that will definitely be out of range of you.
