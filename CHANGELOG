@@ -45,3 +45,8 @@
     - An example: /gh [inc=g1 g2] Flash Heal. This will flash heal people in group 1 and 2.
   The use cases include bosses like vael and emeriss, where you really don't want to accidently heal  people in priest groups. 
   Other possibilities include groups that will definitely be out of range of you.
+
+  1.7
+  - Introduce new mode, "HighestMissingHpHealComm". This is the same as the regular highest missing hp mode, but also will add the incoming
+  heal amount, as reported by the HealComm library (which is also bundled with Luna Unit Frames) into the calculations. The addon can only know about
+  heals from other people who also have HealComm somehow. The use case here is, of course, more ways to avoid heal bombing one target. 

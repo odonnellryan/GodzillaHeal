@@ -418,8 +418,12 @@ local function ChooseSpell(unit, spell)
 			rank = 1
 			break
 		end
-		local spellInfo = TheoryCraft_GetSpellDataByName(spellName, rank - 1)
+
+		local spellInfo = TheoryCraft_GetSpellDataByName(spellName, i - 1)
 		local healAmount = spellInfo.averagehealnocrit
+
+		ghdebug("Checking " ..spellName .. "(Rank "..i.."): Heal Amount = " .. healAmount .. ", Missing Hp = " .. missingHp)
+
 		if (healAmount < missingHp) then
 			rank = i
 			break

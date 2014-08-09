@@ -50,6 +50,8 @@ local function OnSpellCast()
 	-- If we have no target at this point, then the spellcast must be the result of a click on a player in the game
 	-- At least, I believe this has to be true. Unsure.
 	if cast.Target == nil then cast.Target = CastDetails.LastMouseover end
+
+	CastDetails.Cast = CastDetails.PendingCast
 	CallAll(cast)
 	CastDetails.PendingCast = nil
 end
@@ -76,7 +78,7 @@ local function OnEvent()
 		if CastDetails.PendingCast ~= nil then
 			OnSpellCast()
 		end
-	elseif event == "SPELLCAST_STOP" or event == "SPELLCAST_INTERRUPTED" then
+	elseif event == "SPELLCAST_STOP" or event == "SPELLCAST_INTERRUPTED" or event == "SPELLCAST_FAILED" then
 		-- Always send cancel, even if as the result of a successful cast.
 		if CastDetails.Cast ~= nil then
 			CastDetails.Cast = nil
@@ -239,6 +241,7 @@ local function Initialize()
 	f:RegisterEvent("SPELLCAST_START")
 	f:RegisterEvent("SPELLCAST_STOP")
 	f:RegisterEvent("SPELLCAST_INTERRUPTED")
+	f:RegisterEvent("SPELLCAST_FAILED")
 	f:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 	f:RegisterEvent("PLAYER_LOGIN")
 end
