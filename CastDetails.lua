@@ -43,6 +43,9 @@ local function CallAll(cast)
 end
 
 local function OnSpellCast()
+	-- 
+	if CastDetails.Cast ~= nil then end
+
 	local cast = CastDetails.PendingCast
 	local duration = arg1
 	if duration == nil then duration = 0 end
@@ -82,8 +85,6 @@ local function OnEvent()
 		-- Always send cancel, even if as the result of a successful cast.
 		if CastDetails.Cast ~= nil then
 			CastDetails.Cast = nil
-		elseif CastDetails.PendingCast ~= nil then
-			OnSpellCast()
 		end
 	elseif event == "UPDATE_MOUSEOVER_UNIT" then
 		CastDetails.LastMouseover = UnitName("mouseover")

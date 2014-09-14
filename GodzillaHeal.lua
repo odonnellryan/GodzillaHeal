@@ -192,6 +192,7 @@ local function AddUnit(tbl, groupType, index)
 		and not unitInfo.isDead 
 		and unitInfo.online 
 		and UnitIsFriend("player", unitInfo.unitId)
+		and not UnitCanAttack("player", unitInfo.unitId) 
 	then
 		local updated = false	
 		-- Find correct position
