@@ -23,6 +23,8 @@
 --  This library doesn't check these values yet. So it's not working well with self cast.
 --
 
+local MaxRanks;
+
 local NoTargetSpells = {
 	'Tranquility',
 	'Prayer of Healing',
@@ -158,7 +160,7 @@ end
 
 local function ProbeRanks()
 	MaxRanks = {}
-	for i = 1, 120 do
+	for i = 1, 160 do
 		spellName, rankText = GetSpellName(i, "spell")
 		if rankText ~= nil then
 			_, _, rank = string.find(rankText, "Rank (%d)")
