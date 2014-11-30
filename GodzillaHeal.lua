@@ -323,7 +323,7 @@ local function TryCancel()
 end
 
 local function UnitHasBuff(unitId, buffName)
-	for i = 1, 16 do
+	for i = 1, 32 do
 	    GodzillaHeal_ScanningTooltip:SetUnitBuff(unitId, i);
 	    local currentBuffName = GodzillaHeal_ScanningTooltipTextLeft1:GetText();
 	    if currentBuffName == nil then break end
