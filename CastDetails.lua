@@ -15,6 +15,87 @@
 --  CastDetails.RegisterHandler(MyHandler)
 --
 
+
+
+--
+--  Collection of tables to determine if spells are helpful/harmful spells
+--  I need this only when auto self cast is on. Actually, this part isn't done yet.
+--  This library doesn't check these values yet. So it's not working well with self cast.
+--
+
+local NoTargetSpells = {
+	'Tranquility',
+	'Prayer of Healing',
+	'Blizzard',
+	'Hurricane',
+	'Rain of Fire'
+}
+
+local SelfCastSpells = {
+	'Desperate Prayer',
+	'Divine Shield',
+	'Nature\'s Grasp',
+	'Life Tap',
+	'Demon Armor'
+}
+
+local HelpfulSpells = {
+	-- Priest
+	'Flash Heal',
+	'Lesser Heal',
+	'Renew',
+	'Greater Heal',
+	'Heal',
+	'Abolish Disease',
+	'Cure Disease',
+	'Divine Spirit',
+	'Power Word: Fortitude',
+	'Power Word: Shield',
+	'Prayer of Spirit',
+	'Prayer of Fortitude',
+	-- Pally
+	'Blessing of Might',
+	'Holy Light',
+	'Flash of Light',
+	'Purify',
+	'Cleanse',
+	'Blessing of Protection',
+	'Lay on Hands',
+	'Redemption',
+	'Blessing of Wisdom',
+	'Divine Protection',
+	'Blessing of Freedom',
+	'Blessing of Kings',
+	'Blessing of Salvation',
+	'Blessing of Sacrifice',
+	'Divine Intervention',
+	'Holy Shock',
+	'Greater Blessing of Might',
+	'Greater Blessing of Wisdom',
+	'Greater Blessing of Salvation',
+	'Greater Blessing of Sanctuary',
+	'Greater Blessing of Kings',
+	-- Druid
+	'Healing Touch',
+	'Rejuvenation',
+	'Mark of the Wild',
+	'Regrowth',
+	'Cure Poison',
+	'Rebirth',
+	'Abolish Poison',
+	'Gift of the Wild',
+	'Thorns',
+	-- Warlock
+	'Unending Breath',
+	'Ritual of Summoning',
+	'Detect Lesser Invisibility'
+}
+
+local HealsOverTime = {
+	'Rejuvenation',
+	'Renew'
+}
+
 local function ContainsKey(table, element)
  	for _, value in pairs(table) do
 		if value == element then
@@ -22,6 +103,22 @@ local function ContainsKey(table, element)
 		end
 	end
 	return false
+end
+
+local function IsNoTargetSpell(spell)
+	return ContainsKey(NoTargetSpells, spell)
+end
+
+local function IsSelfCastSpell(spell)
+	return ContainsKey(SelfCastSpells, spell)
+end
+
+local function IsHelpfulSpell(spell)
+	return ContainsKey(HelpfulSpells, spell)
+end
+
+local function IsHealOverTime(spellName)
+	return ContainsKey(HealsOverTime, spellName)
 end
 
 local function DebugCast(cast)
@@ -65,12 +162,11 @@ local function ProbeRanks()
 		spellName, rankText = GetSpellName(i, "spell")
 		if rankText ~= nil then
 			_, _, rank = string.find(rankText, "Rank (%d)")
-			if rank ~= nil then
-				rank = tonumber(rank)
-				local cur = MaxRanks[spellName]
-				if cur == nil or rank > cur then
-					MaxRanks[spellName] = rank
-				end
+			if rank == nil then rank = 1 end
+			rank = tonumber(rank)
+			local cur = MaxRanks[spellName]
+			if cur == nil or rank > cur then
+				MaxRanks[spellName] = rank
 			end
 		end
 	end
@@ -99,9 +195,6 @@ end
 
 local function IsSelfCastOn()
 	return GetCVar("autoSelfCast") == "1"
-end
-
-local function IsFriendlySpell()
 end
 
 local function ParseCast(spell)
@@ -204,6 +297,11 @@ local function RegisterHandler(handler)
 	table.insert(CastDetails.Handlers, handler)
 end
 
+local function PlayerHasSpell(cast)
+	local spellName, _ = ParseCast(cast)
+	return GetMaxRank(spellName) ~= nil;
+end
+
 local function Initialize()
 	CastDetails.Handlers = {}
 	CastDetails.CastSpellByName = CastSpellByName
@@ -213,6 +311,8 @@ local function Initialize()
 	CastDetails.TargetUnit = TargetUnit
 	CastDetails.RegisterHandler = RegisterHandler
 	CastDetails.ParseCast = ParseCast
+	CastDetails.IsHealOverTime = IsHealOverTime
+	CastDetails.PlayerHasSpell = PlayerHasSpell
 
 	CastDetails.Debug = false
 
@@ -245,91 +345,6 @@ local function Initialize()
 	f:RegisterEvent("SPELLCAST_FAILED")
 	f:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
 	f:RegisterEvent("PLAYER_LOGIN")
-end
-
---
---  Collection of tables to determine if spells are helpful/harmful spells
---  I need this only when auto self cast is on.
---
-
-local NoTargetSpells = {
-	'Tranquility',
-	'Prayer of Healing',
-	'Blizzard',
-	'Hurricane',
-	'Rain of Fire'
-}
-
-local SelfCastSpells = {
-	'Desperate Prayer',
-	'Divine Shield',
-	'Nature\'s Grasp',
-	'Life Tap',
-	'Demon Armor'
-}
-
-local HelpfulSpells = {
-	-- Priest
-	'Flash Heal',
-	'Lesser Heal',
-	'Renew',
-	'Greater Heal',
-	'Heal',
-	'Abolish Disease',
-	'Cure Disease',
-	'Divine Spirit',
-	'Power Word: Fortitude',
-	'Power Word: Shield',
-	'Prayer of Spirit',
-	'Prayer of Fortitude',
-	-- Pally
-	'Blessing of Might',
-	'Holy Light',
-	'Flash of Light',
-	'Purify',
-	'Cleanse',
-	'Blessing of Protection',
-	'Lay on Hands',
-	'Redemption',
-	'Blessing of Wisdom',
-	'Divine Protection',
-	'Blessing of Freedom',
-	'Blessing of Kings',
-	'Blessing of Salvation',
-	'Blessing of Sacrifice',
-	'Divine Intervention',
-	'Holy Shock',
-	'Greater Blessing of Might',
-	'Greater Blessing of Wisdom',
-	'Greater Blessing of Salvation',
-	'Greater Blessing of Sanctuary',
-	'Greater Blessing of Kings',
-	-- Druid
-	'Healing Touch',
-	'Rejuvenation',
-	'Mark of the Wild',
-	'Regrowth',
-	'Cure Poison',
-	'Rebirth',
-	'Abolish Poison',
-	'Gift of the Wild',
-	'Thorns',
-	-- Warlock
-	'Unending Breath',
-	'Ritual of Summoning',
-	'Detect Lesser Invisibility'
-}
-
-local function IsNoTargetSpell(spell)
-	return ContainsKey(NoTargetSpells, spell)
-end
-
-local function IsSelfCastSpell(spell)
-	return ContainsKey(SelfCastSpells, spell)
-end
-
-local function IsHelpfulSpell(spell)
-	return ContainsKey(HelpfulSpells, spell)
 end
 
 if not CastDetails then

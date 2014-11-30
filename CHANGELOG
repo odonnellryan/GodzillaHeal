@@ -50,3 +50,7 @@
   - Introduce new mode, "HighestMissingHpHealComm". This is the same as the regular highest missing hp mode, but also will add the incoming
   heal amount, as reported by the HealComm library (which is also bundled with Luna Unit Frames) into the calculations. The addon can only know about
   heals from other people who also have HealComm somehow. The use case here is, of course, more ways to avoid heal bombing one target. 
+
+  1.8
+  - Improved support for HOTs (Renew & Rejuvenation). Will only cast HOTs on players that are not currently affected by the specified HOT.
+  Uses the same syntax, /gh Renew.

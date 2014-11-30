@@ -1,5 +1,5 @@
 local HealComm = AceLibrary("HealComm-1.0")
-local GH_VERSION = "1.7"
+local GH_VERSION = "1.8"
 local GodzillaHeal = {}
 
 --
@@ -237,6 +237,8 @@ local function DoesUnitMatchExpression(index, match)
 end
 
 local function RefreshTable(request)
+	local spellName, rank = CastDetails.ParseCast(request.SpellName);
+
 	local include = request.IncludeExpression
 	local exclude = request.ExcludeExpression
 
@@ -320,15 +322,40 @@ local function TryCancel()
 	end
 end
 
+local function UnitHasBuff(unitId, buffName)
+	for i = 1, 16 do
+	    GodzillaHeal_ScanningTooltip:SetUnitBuff(unitId, i);
+	    local currentBuffName = GodzillaHeal_ScanningTooltipTextLeft1:GetText();
+	    if currentBuffName == nil then break end
+	    if buffName == currentBuffName then return true end
+	end
+
+	return false
+end
+
+local function ShouldTryTarget(unitInfo, request)
+
+	local unitId = unitInfo.unitId
+	local missingHp = unitInfo.hpMax - unitInfo.hp
+	local spellName = CastDetails.ParseCast(request.SpellName);
+
+	local shouldTryTarget = not GodzillaHeal.Blacklist[UnitName(unitId)] 
+		and missingHp >= request.Threshold
+		and not (CastDetails.IsHealOverTime(spellName) and UnitHasBuff(unitId, spellName))
+
+	return shouldTryTarget
+end
+
 --
 --  Core
 --
-local function SelectUnit(threshold)
+local function SelectUnit(request)
 	for i = 1, table.getn(GodzillaHeal.HealthTable) do
 		local unitInfo = GodzillaHeal.HealthTable[i]
 		local unitId = unitInfo.unitId
 		local missingHp = unitInfo.hpMax - unitInfo.hp
-		if not GodzillaHeal.Blacklist[UnitName(unitId)] and missingHp >= threshold then
+
+		if ShouldTryTarget(unitInfo, request) then
 			TargetUnit(unitId)
 			if TargetInHealRange() then
 				return unitId
@@ -340,14 +367,14 @@ local function SelectUnit(threshold)
 	return nil
 end
 
-local function SelectRandomUnitFromList(tbl, threshold)
+local function SelectRandomUnitFromList(tbl, request)
 	tbl = GHUtil.copyTable(tbl) -- Don't need to copy here, but just do it to prevent bugs in the future
 	while table.getn(tbl) > 0 do
 		local i = math.random(table.getn(tbl))
 		local unitInfo = tbl[i]
 		local unitId = unitInfo.unitId
-		local missingHp = unitInfo.hpMax - unitInfo.hp
-		if not GodzillaHeal.Blacklist[UnitName(unitId)] and missingHp >= threshold then
+		
+		if ShouldTryTarget(unitInfo, request) then
 			TargetUnit(unitId)
 			if TargetInHealRange() then
 				return unitId
@@ -372,11 +399,14 @@ end
 -- and anyone who is within 10% of that percentage. Unfortunately I have to deal with the situation
 -- where nobody in that list is within range. The technique is create this list, remove them from the original
 -- table, see if anyone in the list is within range, and then otherwise call recursively to that smaller list.
-local function SelectUnitRandomCore(tbl, threshold, randomize)
+local function SelectUnitRandomCore(tbl, request)
+
 	if table.getn(tbl) == 0 then return nil end
 
 	local unitInfo = tbl[1]
 	local topMetric = unitInfo.metric
+	local threshold = request.Threshold
+	local randomize = request.Randomize
 
 	local possibleUnits = {}
 
@@ -401,14 +431,14 @@ local function SelectUnitRandomCore(tbl, threshold, randomize)
 
 	ghdebug("Randomize: " .. table.getn(possibleUnits) .. " possible candidate(s).")
 
-	local selectedUnit = SelectRandomUnitFromList(possibleUnits, threshold)
+	local selectedUnit = SelectRandomUnitFromList(possibleUnits, request)
 	if selectedUnit then return selectedUnit end
-	return SelectUnitRandomCore(tbl, threshold, randomize)
+	return SelectUnitRandomCore(tbl, request)
 end
 
-local function SelectUnitRandom(threshold, randomize)
+local function SelectUnitRandom(request)
 	local copy = GHUtil.copyTable(GodzillaHeal.HealthTable)
-	return SelectUnitRandomCore(copy, threshold, randomize)
+	return SelectUnitRandomCore(copy, request)
 end
 
 local function ChooseSpell(unit, spell)
@@ -496,13 +526,18 @@ local function GodzillaHeal_Heal(commandString)
 
 	local healRequest = ParseHealRequest(commandString)
 
+	if not CastDetails.PlayerHasSpell(healRequest.SpellName) then
+		ghprint("Unknown spell `" .. healRequest.SpellName .. "`.")
+		return
+	end
+
 	RefreshTable(healRequest)
 
 	local selectedUnit = nil
 	if healRequest.Randomize == 0 then
-		selectedUnit = SelectUnit(healRequest.Threshold)
+		selectedUnit = SelectUnit(healRequest)
 	else
-		selectedUnit = SelectUnitRandom(healRequest.Threshold, healRequest.Randomize)
+		selectedUnit = SelectUnitRandom(healRequest)
 	end
 
 	if selectedUnit == nil then
