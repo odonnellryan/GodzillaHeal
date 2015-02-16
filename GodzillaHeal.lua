@@ -1,5 +1,5 @@
 local HealComm = AceLibrary("HealComm-1.0")
-local GH_VERSION = "1.8"
+local GH_VERSION = "1.9"
 local GodzillaHeal = {}
 
 --
@@ -55,6 +55,19 @@ local GodzillaHeal_DefaultSettings = {
 	ExcludeExpression = ""
 }
 
+local function ghprint(msg)
+	if msg == nil then
+		msg = "[nil]"
+	end
+	DEFAULT_CHAT_FRAME:AddMessage(YELLOW.."GodzillaHeal: "..WHITE..msg)
+end
+
+local function ghdebug(msg)
+	if GodzillaHeal.Debug then
+		ghprint(msg)
+	end
+end
+
 --
 --  Modes
 --  To add a new mode, add to this list. Nothing else is required.
@@ -73,9 +86,10 @@ table.insert(Modes, {
 	})
 
 table.insert(Modes, {
-	GetMetric = function(unit) return UnitHealthMax(unit) - UnitHealth(unit) + HealComm:getHeal(UnitName(unit)) end,
+	GetMetric = function(unit) return UnitHealthMax(unit) - UnitHealth(unit) - HealComm:getHeal(UnitName(unit)) end,
 	Ascending = false,
-	Name = "HighestMissingHpHealComm"
+	Name = "HighestMissingHpHealComm",
+	ShouldTarget = function(unit, threshold) return UnitHealthMax(unit) - UnitHealth(unit) - HealComm:getHeal(UnitName(unit)) > threshold end
 	})
 
 --
@@ -97,19 +111,6 @@ local healNames = {
 	'Lesser Healing Wave',
 	'Chain Heal'
 }
-
-local function ghprint(msg)
-	if msg == nil then
-		msg = "[nil]"
-	end
-	DEFAULT_CHAT_FRAME:AddMessage(YELLOW.."GodzillaHeal: "..WHITE..msg)
-end
-
-local function ghdebug(msg)
-	if GodzillaHeal.Debug then
-		ghprint(msg)
-	end
-end
 
 local function TargetInHealRange()
 	return IsActionInRange(GodzillaHeal.HealActionSlot) == 1
@@ -335,13 +336,23 @@ end
 
 local function ShouldTryTarget(unitInfo, request)
 
-	local unitId = unitInfo.unitId
-	local missingHp = unitInfo.hpMax - unitInfo.hp
+	--
+	--  Here we have a chance to filter out undesirable targets.
+	--
+
+	local unitId = unitInfo.unitId	
 	local spellName = CastDetails.ParseCast(request.SpellName);
 
 	local shouldTryTarget = not GodzillaHeal.Blacklist[UnitName(unitId)] 
-		and missingHp >= request.Threshold
 		and not (CastDetails.IsHealOverTime(spellName) and UnitHasBuff(unitId, spellName))
+
+	-- Allow mode to override
+	if (GodzillaHeal.Mode.ShouldTarget ~= null)  then
+		shouldTryTarget = shouldTryTarget and GodzillaHeal.Mode.ShouldTarget(unitId, request.Threshold)
+	else
+		local missingHp = unitInfo.hpMax - unitInfo.hp
+		shouldTryTarget = shouldTryTarget and missingHp >= request.Threshold
+	end
 
 	return shouldTryTarget
 end

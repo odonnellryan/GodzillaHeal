@@ -15,7 +15,7 @@
 
 1.3
 - Introduce /ght, aka "GodzillaHeal Tank". Does not do any target selection, just casts the heal on your target. When used with /gh cancel, 
-  GodzillaHeal will cancel the cast as last as possible. This is meant to be used for tank healing in raids, when you want to cancel cast
+  GodzillaHeal will cancel the cast as late as possible. This is meant to be used for tank healing in raids, when you want to cancel cast
   if the target hasn't lost any health, but you want the cast to go as long as possible before canceling. Any healed casted as a result of /ght
   will have this "delayed" cancel behavior, as opposed to the behavior of heals intiated with /gh which will cancel the second the target does above
   the threshold.
@@ -46,11 +46,14 @@
   The use cases include bosses like vael and emeriss, where you really don't want to accidently heal  people in priest groups. 
   Other possibilities include groups that will definitely be out of range of you.
 
-  1.7
-  - Introduce new mode, "HighestMissingHpHealComm". This is the same as the regular highest missing hp mode, but also will add the incoming
+1.7
+- Introduce new mode, "HighestMissingHpHealComm". This is the same as the regular highest missing hp mode, but also will add the incoming
   heal amount, as reported by the HealComm library (which is also bundled with Luna Unit Frames) into the calculations. The addon can only know about
   heals from other people who also have HealComm somehow. The use case here is, of course, more ways to avoid heal bombing one target. 
 
-  1.8
-  - Improved support for HOTs (Renew & Rejuvenation). Will only cast HOTs on players that are not currently affected by the specified HOT.
+1.8
+- Improved support for HOTs (Renew & Rejuvenation). Will only cast HOTs on players that are not currently affected by the specified HOT.
   Uses the same syntax, /gh Renew.
+
+1.9
+- Make HighestMissingHpHealComm actually work. Still probably needs testing in a real raid. 
