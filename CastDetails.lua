@@ -216,13 +216,13 @@ end
 --  The idea is that if the hooked function (e.g. UseAction) succeeds,
 --  we'll soon after receive a SPELLCAST_START event. This means that for
 --  this addon to be accurate, the function that causes the spellcast must
---  be the last one called before the event. I'm pretty sure this isn't gaurenteed
+--  be the last one called before the event. I'm pretty sure this isn't guaranteed
 --  to be true; it's possible that OnCast will be called once, which causes
 --  the spellcast, and then quickly again before the event is raised.
 --  This means the cast information may be wrong, e.g. wrong spell or rank.
 --  But it seems unlikely to me, esp. because a player is probably spamming
 --  the same spell anyway, so it would've been the same regardless. It's hard
---  to find information about any gaurentees that do or don't exist in the API,
+--  to find information about any guarantees that do or don't exist in the API,
 --  and even if there were I suspect it would also depend on the server.
 --
 local function OnCast(spellName, rank, targetOverride)
@@ -232,7 +232,7 @@ local function OnCast(spellName, rank, targetOverride)
 
 	local target = targetOverride
 	if target == nil and UnitExists("target") then
-		-- Is auto self cast isn't on, then the target is for sure the right choice.
+		-- If auto self cast isn't on, then the target is for sure the right choice.
 		-- If it is on, then benefical spells may end up targetting the player instead of the
 		-- target. It just depends on the type of spell and whether or not the unit can receive
 		-- benefical spells. Luckily UnitCanAssist does the second part, 
@@ -251,7 +251,7 @@ local function OnCast(spellName, rank, targetOverride)
 end
 
 local function CastSpellNew(spellId, bookType)
-	-- Not support this yet (stupid function)
+	-- Not supporting this yet (stupid function)
 	CastDetails.PendingCast = nil
 	CastDetails.CastSpell(spellId, bookType)
 end
